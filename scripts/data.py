@@ -14,7 +14,6 @@ def load_all_data(edges_file, features_file, classes_file):
     target_encoding.fit_transform(df_classes['class'])
 
     G = StellarGraph(edges=df_patients, nodes=df_features)
-    print(G.info())
     return df_patients, df_features, df_classes, G
 
 

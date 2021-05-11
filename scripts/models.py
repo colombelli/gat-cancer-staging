@@ -13,9 +13,6 @@ def get_gat_model(generator, output_dimention,
                   attention_heads=8, in_dropout=0.15, attention_dropout=0.15, 
                   learning_rate=0.0001, loss_function='categorical_crossentropy'):
 
-    #generator = FullBatchNodeGenerator(G, method="gat")
-    #train_gen = generator.flow(train_subjects.index, train_targets)
-
     gat = GAT(
         layer_sizes=[first_layer_size, second_layer_size, output_dimention],
         activations=[first_activation, second_activation, output_activation],
@@ -35,13 +32,12 @@ def get_gat_model(generator, output_dimention,
     return model
 
 
-def get_mlp_model(number_of_classes, input_dimension, 
+def get_mlp_model(output_dimention, input_dimension, 
                   num_neurons_1st_layer=64, num_neurons_2nd_layer=64,
                   dropout=0.15,
                   first_activation='elu', second_activation='elu', output_activation='softmax',
                   learning_rate=0.0001, loss_function='categorical_crossentropy'):
 
-    nb_classes = number_of_classes
     input_dim = input_dimension
 
     model = Sequential()
@@ -51,7 +47,7 @@ def get_mlp_model(number_of_classes, input_dimension,
     model.add(Dense(num_neurons_2nd_layer))
     model.add(Activation(second_activation))
     model.add(Dropout(dropout))
-    model.add(Dense(nb_classes))
+    model.add(Dense(output_dimention))
     model.add(Activation(output_activation))
 
     model.compile(loss=loss_function, optimizer=optimizers.Adam(lr=learning_rate), 
