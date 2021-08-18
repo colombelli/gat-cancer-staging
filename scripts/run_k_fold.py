@@ -33,14 +33,18 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        "/home/colombelli/Documents/Learning with graphs/gat_experiments/exp1/",
+        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R1/",
+        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R2/",
+        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R3/",
+        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R4/",
+        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R5/"
         ]
 
 
-training_epochs = 10 # 500?
+training_epochs = 500
 k = 10
-cross_validation_repetitions = 5 ## 10?
-experiments_seed = 22
+cross_validation_repetitions = 50
+experiments_seed = 42
 
 ##################################################
 ##################################################
