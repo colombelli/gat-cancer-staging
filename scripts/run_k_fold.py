@@ -39,7 +39,7 @@ base_paths = [
 
 training_epochs = 10 # 500?
 k = 10
-cross_validation_repetitions = 1 ## 10?
+cross_validation_repetitions = 5 ## 10?
 experiments_seed = 22
 
 ##################################################
