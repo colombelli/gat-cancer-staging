@@ -68,9 +68,9 @@ if __name__ =="__main__":
     print("Starting experiments for path:\n", base_path)
     print("##############################################################\n")
 
-    edges_file = base_path+"patients_edges.csv"
-    features_file = base_path+"patients_features.csv"
-    classes_file = base_path+"patients_classes.csv"
+    edges_file = base_path+"edges.csv"
+    features_file = base_path+"features.csv"
+    classes_file = base_path+"classes.csv"
 
     df_patients, df_features, df_classes, G = load_all_data(edges_file, features_file, classes_file)
     with open(base_path+"graph_info.txt", "w") as f:
