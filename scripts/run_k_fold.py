@@ -33,17 +33,17 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R1/",
-        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R2/",
-        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R3/",
-        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R4/",
-        "/home/ubuntu/datasets/acgt/kidney/stellargraph/R5/"
+        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N1/",
+        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N2/",
+        "/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N3/",
+        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N4/",
+        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N5/"
         ]
 
 
 training_epochs = 500
-k = 10
-cross_validation_repetitions = 50
+k = 3#10
+cross_validation_repetitions = 2#50
 experiments_seed = 42
 
 ##################################################
