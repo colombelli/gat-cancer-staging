@@ -26,7 +26,7 @@ def get_gat_model(generator, output_dimention,
     x_inp, predictions = gat.in_out_tensors()
     model = Model(inputs=x_inp, outputs=predictions)
 
-    model.compile(optimizer=optimizers.Adam(lr=learning_rate), loss=loss_function,
+    model.compile(optimizer=optimizers.Adam(learning_rate=learning_rate), loss=loss_function,
             metrics=["acc", metrics.AUC(curve="ROC", name="auc_roc"), metrics.AUC(curve="PR", name="auc_pr")])
 
     return model
@@ -50,7 +50,7 @@ def get_mlp_model(output_dimention, input_dimension,
     model.add(Dense(output_dimention))
     model.add(Activation(output_activation))
 
-    model.compile(loss=loss_function, optimizer=optimizers.Adam(lr=learning_rate), 
+    model.compile(loss=loss_function, optimizer=optimizers.Adam(learning_rate=learning_rate), 
               metrics=["acc", metrics.AUC(curve="ROC", name="auc_roc"), metrics.AUC(curve="PR", name="auc_pr")])
     
     return model

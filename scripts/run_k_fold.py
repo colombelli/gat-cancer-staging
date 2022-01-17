@@ -5,6 +5,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import logging
 import tensorflow as tf
+from focal_loss import SparseCategoricalFocalLoss
+
 tf.compat.v1.logging.set_verbosity(40)
 
 from sklearn.model_selection import StratifiedKFold
@@ -25,7 +27,11 @@ second_activation='elu'
 output_activation='softmax'
 dropout=0.15
 learning_rate=0.0001
-loss_function='categorical_crossentropy'
+
+#'categorical_crossentropy'
+loss_function=SparseCategoricalFocalLoss(gamma=2, from_logits=True)#,
+                        #class_weight=[[2.3276, 1.6831, 0.3852, 1.1163, 2.0641]]) 
+                        # These weights are pre-computed
 
 attention_heads=8
 attention_dropout=0.15
@@ -111,6 +117,7 @@ if __name__ =="__main__":
           learning_rate, loss_function)
 
 
+        
         print("\nTraining GAT model... ")
         gat_model.fit(train_gen, epochs=training_epochs, verbose=0,
             shuffle=False,  # this should be False, since shuffling data means shuffling the whole graph
