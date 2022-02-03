@@ -3,7 +3,6 @@ from keras.utils import np_utils
 from keras.layers.core import Dense, Activation, Dropout
 
 from tensorflow.keras import layers, optimizers, losses, metrics, Model
-
 from stellargraph.mapper import FullBatchNodeGenerator
 from stellargraph.layer import GAT
 
@@ -51,6 +50,6 @@ def get_mlp_model(output_dimention, input_dimension,
     model.add(Activation(output_activation))
 
     model.compile(loss=loss_function, optimizer=optimizers.Adam(learning_rate=learning_rate), 
-              metrics=["acc", metrics.AUC(curve="ROC", name="auc_roc"), metrics.AUC(curve="PR", name="auc_pr")])
+          metrics=["acc", metrics.AUC(curve="ROC", name="auc_roc"), metrics.AUC(curve="PR", name="auc_pr")])
     
     return model

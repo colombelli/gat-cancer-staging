@@ -1,3 +1,4 @@
+from pickle import FALSE
 import pandas as pd
 import numpy as np
 import os
@@ -5,7 +6,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import logging
 import tensorflow as tf
-from focal_loss import SparseCategoricalFocalLoss
 
 tf.compat.v1.logging.set_verbosity(40)
 
@@ -14,6 +14,7 @@ from stellargraph.mapper import FullBatchNodeGenerator
 
 from data import load_all_data, binarize_data
 from models import get_gat_model, get_mlp_model
+from losses import categorical_focal_loss
 
 
 ##################################################
@@ -28,10 +29,10 @@ output_activation='softmax'
 dropout=0.15
 learning_rate=0.0001
 
-#'categorical_crossentropy'
-loss_function=SparseCategoricalFocalLoss(gamma=2, from_logits=True)#,
-                        #class_weight=[[2.3276, 1.6831, 0.3852, 1.1163, 2.0641]]) 
-                        # These weights are pre-computed
+#loss_function='categorical_crossentropy'
+loss_function = categorical_focal_loss(alpha=[2.3276, 1.6831, 0.3852, 1.1163, 
+                                    2.0641]) # These weights were pre-computed
+                        
 
 attention_heads=8
 attention_dropout=0.15
@@ -39,16 +40,12 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N1/",
-        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N2/",
-        "/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N3/",
-        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N4/",
-        #"/home/colombelli/Documents/datasets/pankidney firebrowse/stellargraph/N5/"
+        "C:/Users/colombelli/Desktop/TCC/data/N3/"
         ]
 
 
-training_epochs = 500
-k = 3#10
+training_epochs = 2000
+k = 10
 cross_validation_repetitions = 2#50
 experiments_seed = 42
 
@@ -65,6 +62,7 @@ from tensorflow import random
 random.set_seed(experiments_seed)
 
 
+
 if __name__ =="__main__":
     
 
@@ -78,7 +76,8 @@ if __name__ =="__main__":
     features_file = base_path+"features.csv"
     classes_file = base_path+"classes.csv"
 
-    df_patients, df_features, df_classes, G = load_all_data(edges_file, features_file, classes_file)
+    df_patients, df_features, df_classes, G = load_all_data(edges_file, 
+                                                    features_file, classes_file)
     with open(base_path+"graph_info.txt", "w") as f:
       print(G.info(), file=f)
 
@@ -91,8 +90,6 @@ if __name__ =="__main__":
       for train, test in kfold.split(df_features, df_classes):
         j+=1
         print("\nOuter iteration: {} | k-Fold iteration: {} | Total: {}".format(i+1, j, (i+1)*j))
-
-
 
         X_train = df_features.iloc[train]
         y_train = binarize_data(df_classes.iloc[train])
@@ -115,8 +112,6 @@ if __name__ =="__main__":
           first_layer_size, second_layer_size, dropout,
           first_activation, second_activation, output_activation,
           learning_rate, loss_function)
-
-
         
         print("\nTraining GAT model... ")
         gat_model.fit(train_gen, epochs=training_epochs, verbose=0,
@@ -130,9 +125,10 @@ if __name__ =="__main__":
         gat_evaluation["auc_roc"].append(gat_performance[2])
         gat_evaluation["auc_pr"].append(gat_performance[3])
         
-
+        
         print("\nTraining MLP model...")
-        mlp_model.fit(X_train, y_train, epochs=training_epochs, batch_size=mlp_batch_size, verbose=0)
+        mlp_model.fit(X_train, y_train, epochs=training_epochs, 
+                      batch_size=mlp_batch_size, verbose=0)
         mlp_performance = mlp_model.evaluate(X_test, y_test)
 
         mlp_evaluation["acc"].append(mlp_performance[1])
