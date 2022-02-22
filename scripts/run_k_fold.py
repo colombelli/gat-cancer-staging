@@ -27,12 +27,12 @@ first_activation='elu'
 second_activation='elu'
 output_activation='softmax'
 dropout=0.15
-learning_rate=0.0001
+learning_rate=0.001
 
 #loss_function='categorical_crossentropy'
 #loss_function = categorical_focal_loss(alpha=[2.3276, 1.6831, 0.3852, 1.1163, 
 #                                    2.0641]) # These weights were pre-computed
-loss_function = categorical_focal_loss(alpha=[0.4401, 1.9231, 1.2755, 2.3584])
+loss_function = categorical_focal_loss(alpha=[1.5243, 0.4411, 0.9816, 17.0454])
                         
 
 attention_heads=8
@@ -41,11 +41,11 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        "C:/Users/colombelli/Desktop/TCC/data/N3/"
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/"
         ]
 
 
-training_epochs = 2000
+training_epochs = 500
 k = 10
 cross_validation_repetitions = 1
 experiments_seed = 42
