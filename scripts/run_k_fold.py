@@ -30,8 +30,9 @@ dropout=0.15
 learning_rate=0.0001
 
 #loss_function='categorical_crossentropy'
-loss_function = categorical_focal_loss(alpha=[2.3276, 1.6831, 0.3852, 1.1163, 
-                                    2.0641]) # These weights were pre-computed
+#loss_function = categorical_focal_loss(alpha=[2.3276, 1.6831, 0.3852, 1.1163, 
+#                                    2.0641]) # These weights were pre-computed
+loss_function = categorical_focal_loss(alpha=[0.4401, 1.9231, 1.2755, 2.3584])
                         
 
 attention_heads=8
@@ -46,7 +47,7 @@ base_paths = [
 
 training_epochs = 2000
 k = 10
-cross_validation_repetitions = 2#50
+cross_validation_repetitions = 1
 experiments_seed = 42
 
 ##################################################
@@ -77,7 +78,8 @@ if __name__ =="__main__":
     classes_file = base_path+"classes.csv"
 
     df_patients, df_features, df_classes, G = load_all_data(edges_file, 
-                                                    features_file, classes_file)
+                                                    features_file, classes_file,
+                                                    only_cancer=True)
     with open(base_path+"graph_info.txt", "w") as f:
       print(G.info(), file=f)
 
