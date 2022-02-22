@@ -1,16 +1,20 @@
+from cProfile import label
 from pickle import FALSE
 import pandas as pd
 import numpy as np
+from matplotlib import pyplot as plt
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import logging
 import tensorflow as tf
 import csv
+from pathlib import Path
 
 tf.compat.v1.logging.set_verbosity(40)
 
 from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import confusion_matrix
 from stellargraph.mapper import FullBatchNodeGenerator
 
 from data import load_all_data, binarize_data
@@ -46,7 +50,7 @@ base_paths = [
         ]
 
 
-training_epochs = 1000
+training_epochs = 50
 k = 10
 cross_validation_repetitions = 1
 experiments_seed = 42
@@ -71,6 +75,34 @@ def write_to_results_csv(csv_file, row):
     writer.writerow(row)
   return
 
+
+def clear_plot():
+  plt.figure().clear()
+  plt.cla()
+  plt.clf()
+  plt.close('all')
+  return
+
+
+def plot_save_metric(models_history, models_names, metric, i, j):
+  fig = plt.figure()
+  for i, history in enumerate(models_history):
+    plt.plot(history.history[metric], label=models_names[i])
+  plt.title(f'model {metric}')
+  plt.ylabel(metric)
+  plt.xlabel('epoch')
+  plt.legend(models_names)
+  fig.savefig(base_path + f"training_plots/{metric}/{i}_{j}.png")
+  clear_plot()
+  return
+
+
+def save_plots_history(models_history, models_names, i, j):
+  plot_save_metric(models_history, models_names, 'loss', i, j)
+  plot_save_metric(models_history, models_names, 'acc', i, j)
+  plot_save_metric(models_history, models_names, 'auc_roc', i, j)
+  plot_save_metric(models_history, models_names, 'auc_pr', i, j)
+  return
 
 
 if __name__ =="__main__":
@@ -99,6 +131,12 @@ if __name__ =="__main__":
     write_to_results_csv(gat_results_file, first_csv_row)
     write_to_results_csv(mlp_results_file, first_csv_row)
 
+    Path(base_path+"training_plots/").mkdir(parents=True, exist_ok=True)
+    Path(base_path+"training_plots/loss/").mkdir(parents=True, exist_ok=True)
+    Path(base_path+"training_plots/acc/").mkdir(parents=True, exist_ok=True)
+    Path(base_path+"training_plots/auc_roc/").mkdir(parents=True, exist_ok=True)
+    Path(base_path+"training_plots/auc_pr/").mkdir(parents=True, exist_ok=True)
+
 
     for i in range(cross_validation_repetitions):
 
@@ -106,7 +144,8 @@ if __name__ =="__main__":
       j=0
       for train, test in kfold.split(df_features, df_classes):
         j+=1
-        print("\nOuter iteration: {} | k-Fold iteration: {} | Total: {}".format(i+1, j, (i+1)*j))
+        print(f"\nOuter iteration: {i+1} | k-Fold iteration: {j} | \
+              Total: {(i+1)*j}")
 
         X_train = df_features.iloc[train]
         y_train = binarize_data(df_classes.iloc[train])
@@ -131,20 +170,22 @@ if __name__ =="__main__":
           learning_rate, loss_function)
         
         print("\nTraining GAT model... ")
-        gat_model.fit(train_gen, epochs=training_epochs, verbose=0,
-            shuffle=False,  # This should be False, since shuffling data means shuffling the whole graph
+        gat_history = gat_model.fit(train_gen, epochs=training_epochs, 
+            verbose=0, shuffle=False,  # This should be False, since shuffling 
+                                       # data means shuffling the whole graph
         )
 
         test_gen = generator.flow(X_test.index, y_test)
         gat_performance = gat_model.evaluate(test_gen)
         write_to_results_csv(gat_results_file, gat_performance)
 
+
         
         print("\nTraining MLP model...")
-        mlp_model.fit(X_train, y_train, epochs=training_epochs, 
+        mlp_history = mlp_model.fit(X_train, y_train, epochs=training_epochs, 
                       batch_size=mlp_batch_size, verbose=0)
         mlp_performance = mlp_model.evaluate(X_test, y_test)
         write_to_results_csv(mlp_results_file, mlp_performance)
-    
-    #pd.DataFrame.from_dict(gat_evaluation).to_csv(base_path+"gat_results.csv")
-    #pd.DataFrame.from_dict(mlp_evaluation).to_csv(base_path+"mlp_results.csv")
+
+        print("\nPlotting models' history (loss, acc, auc_roc, pr_auc) ...")
+        save_plots_history([gat_history, mlp_history], ["gat", "mlp"], i, j)
