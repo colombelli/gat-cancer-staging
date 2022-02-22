@@ -6,6 +6,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import logging
 import tensorflow as tf
+import csv
 
 tf.compat.v1.logging.set_verbosity(40)
 
@@ -21,8 +22,8 @@ from losses import categorical_focal_loss
 ################ INPUT PARAMETERS ################
 ##################################################
 
-first_layer_size=64
-second_layer_size=64
+first_layer_size=16
+second_layer_size=16
 first_activation='elu'
 second_activation='elu'
 output_activation='softmax'
@@ -41,11 +42,11 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/"
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/06_005_all_features/"
         ]
 
 
-training_epochs = 500
+training_epochs = 1000
 k = 10
 cross_validation_repetitions = 1
 experiments_seed = 42
@@ -61,6 +62,14 @@ seed(experiments_seed)
 
 from tensorflow import random
 random.set_seed(experiments_seed)
+
+
+
+def write_to_results_csv(csv_file, row):
+  with open(csv_file, 'a', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(row)
+  return
 
 
 
@@ -83,8 +92,14 @@ if __name__ =="__main__":
     with open(base_path+"graph_info.txt", "w") as f:
       print(G.info(), file=f)
 
-    gat_evaluation = {"acc":[], "auc_roc":[], "auc_pr":[]}
-    mlp_evaluation = {"acc":[], "auc_roc":[], "auc_pr":[]}
+    gat_results_file = base_path+"gat_results.csv"
+    mlp_results_file = base_path+"mlp_results.csv"
+    
+    first_csv_row = ["loss", "acc", "auc_roc", "auc_pr"]
+    write_to_results_csv(gat_results_file, first_csv_row)
+    write_to_results_csv(mlp_results_file, first_csv_row)
+
+
     for i in range(cross_validation_repetitions):
 
       kfold = StratifiedKFold(n_splits=k, shuffle=True)
@@ -117,25 +132,19 @@ if __name__ =="__main__":
         
         print("\nTraining GAT model... ")
         gat_model.fit(train_gen, epochs=training_epochs, verbose=0,
-            shuffle=False,  # this should be False, since shuffling data means shuffling the whole graph
+            shuffle=False,  # This should be False, since shuffling data means shuffling the whole graph
         )
 
         test_gen = generator.flow(X_test.index, y_test)
         gat_performance = gat_model.evaluate(test_gen)
+        write_to_results_csv(gat_results_file, gat_performance)
 
-        gat_evaluation["acc"].append(gat_performance[1])
-        gat_evaluation["auc_roc"].append(gat_performance[2])
-        gat_evaluation["auc_pr"].append(gat_performance[3])
-        
         
         print("\nTraining MLP model...")
         mlp_model.fit(X_train, y_train, epochs=training_epochs, 
                       batch_size=mlp_batch_size, verbose=0)
         mlp_performance = mlp_model.evaluate(X_test, y_test)
-
-        mlp_evaluation["acc"].append(mlp_performance[1])
-        mlp_evaluation["auc_roc"].append(mlp_performance[2])
-        mlp_evaluation["auc_pr"].append(mlp_performance[3])
+        write_to_results_csv(mlp_results_file, mlp_performance)
     
-    pd.DataFrame.from_dict(gat_evaluation).to_csv(base_path+"gat_results.csv")
-    pd.DataFrame.from_dict(mlp_evaluation).to_csv(base_path+"mlp_results.csv")
+    #pd.DataFrame.from_dict(gat_evaluation).to_csv(base_path+"gat_results.csv")
+    #pd.DataFrame.from_dict(mlp_evaluation).to_csv(base_path+"mlp_results.csv")
