@@ -95,10 +95,8 @@ class DataManager:
 
         y_true_classes = np.argmax(y_test, axis=1)
         classes_in_order = [i for i in range(len(self.classes))]
-        print("True classes:", y_true_classes)
         for m, pred in enumerate(y_preds):
             pred = np.argmax(pred, axis=1)
-            print(f"{self.models_names[m]} pred: ", pred, "\n")
             conf_matrix = confusion_matrix(y_true_classes, pred, 
                             labels=classes_in_order)
             df = pd.DataFrame(conf_matrix)

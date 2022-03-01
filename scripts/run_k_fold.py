@@ -46,7 +46,7 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        "C:/Users/colombelli/Desktop/TCC/data/PMLB/waveform_40/"
+        "C:/Users/colombelli/Desktop/TCC/data/PMLB/waveform_40/r08/"
         #"C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/06_005_100feat_stage23_gat_one_layer/"
         ]
 
