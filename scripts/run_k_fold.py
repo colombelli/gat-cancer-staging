@@ -22,8 +22,8 @@ from losses import categorical_focal_loss
 
 models_names = ["gat", "mlp"]  # In the order they are trained/evaluated
 
-first_layer_size=16
-second_layer_size=16
+first_layer_size=32
+second_layer_size=32
 first_activation='elu'
 second_activation='elu'
 output_activation='softmax'
@@ -33,8 +33,12 @@ learning_rate=0.001
 #loss_function='categorical_crossentropy'
 #loss_function = categorical_focal_loss(alpha=[2.3276, 1.6831, 0.3852, 1.1163, 
 #                                    2.0641]) # These weights were pre-computed
-loss_function = categorical_focal_loss(alpha=[1.5243, 0.4411, 0.9816, 17.0454])
-classes = ["stage1", "stage2", "stage3", "stage4"]
+#loss_function = categorical_focal_loss(alpha=[1.5243, 0.4411, 0.9816, 17.0454])
+#classes = ["stage1", "stage2", "stage3", "stage4"]
+#loss_function = [categorical_focal_loss(alpha=[[1.5243, 0.3043, 17.0454]], gamma=0)]
+#classes = ["stage1", "stage23", "stage4"]
+loss_function = [categorical_focal_loss(alpha=[[1,1,1]], gamma=0)]
+classes = [0,1,2]
 
 attention_heads=8
 attention_dropout=0.15
@@ -42,11 +46,12 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/06_005_all_features/"
+        "C:/Users/colombelli/Desktop/TCC/data/PMLB/waveform_40/"
+        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/06_005_100feat_stage23_gat_one_layer/"
         ]
 
 
-training_epochs = 50
+training_epochs = 500
 k = 10
 cross_validation_repetitions = 1
 experiments_seed = 42

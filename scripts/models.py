@@ -13,8 +13,10 @@ def get_gat_model(generator, output_dimention,
                   learning_rate=0.0001, loss_function='categorical_crossentropy'):
 
     gat = GAT(
-        layer_sizes=[first_layer_size, second_layer_size, output_dimention],
-        activations=[first_activation, second_activation, output_activation],
+        #layer_sizes=[first_layer_size, second_layer_size, output_dimention],
+        layer_sizes=[output_dimention],
+        #activations=[first_activation, second_activation, output_activation],
+        activations=[output_activation],
         attn_heads=attention_heads,
         generator=generator,
         in_dropout=in_dropout,
