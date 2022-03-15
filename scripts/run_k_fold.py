@@ -37,8 +37,11 @@ learning_rate=0.001
 #classes = ["stage1", "stage2", "stage3", "stage4"]
 #loss_function = [categorical_focal_loss(alpha=[[1.5243, 0.3043, 17.0454]], gamma=0)]
 #classes = ["stage1", "stage23", "stage4"]
-loss_function = [categorical_focal_loss(alpha=[[1,1,1]], gamma=0)]
-classes = [0,1,2]
+#loss_function = [categorical_focal_loss(alpha=[[1,1,1]], gamma=0)]
+#classes = [0,1,2]
+
+loss_function = [categorical_focal_loss(alpha=[[0.5148, 2.5242, 1.0868, 1.34914]], gamma=2)]
+classes = ["stage1", "stage2", "stage3", "stage4"]
 
 attention_heads=8
 attention_dropout=0.15
@@ -46,8 +49,25 @@ attention_dropout=0.15
 mlp_batch_size=8
 
 base_paths = [
-        "C:/Users/colombelli/Desktop/TCC/data/PMLB/waveform_40/r08/"
+        #"C:/Users/colombelli/Desktop/TCC/data/PMLB/waveform_40/r08/"
         #"C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/06_005_100feat_stage23_gat_one_layer/"
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/0_005_100feat/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/01_005_100feat/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/02_005_100feat/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/03_005_100feat/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/04_005_100feat/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/05_005_100feat/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/06_005_100feat/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/07_005_100feat/",
+
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/0_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/01_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/02_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/03_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/04_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/05_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/06_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/07_005_100/",
         ]
 
 
