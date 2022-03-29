@@ -70,20 +70,23 @@ class DataManager:
         return
 
 
-    def plot_save_metric(self, models_history, metric, i, j):
+    def plot_save_metric(self, models_history, metric, i, j=None):
         fig = plt.figure()
-        for i, history in enumerate(models_history):
-            plt.plot(history.history[metric], label=self.models_names[i])
+        for k, history in enumerate(models_history):
+            plt.plot(history.history[metric], label=self.models_names[k])
         plt.title(f'model {metric}')
         plt.ylabel(metric)
         plt.xlabel('epoch')
         plt.legend(self.models_names)
-        fig.savefig(self.base_path + f"training_plots/{metric}/{i}_{j}.png")
+        if j is None:
+            fig.savefig(self.base_path + f"training_plots/{metric}/{i}.png")
+        else:
+            fig.savefig(self.base_path + f"training_plots/{metric}/{i}_{j}.png")
         self.clear_plot()
         return
 
 
-    def save_plots_history(self, models_history, i, j):
+    def save_plots_history(self, models_history, i, j=None):
         self.plot_save_metric(models_history, 'loss', i, j)
         self.plot_save_metric(models_history, 'acc', i, j)
         self.plot_save_metric(models_history, 'auc_roc', i, j)
@@ -91,7 +94,7 @@ class DataManager:
         return
 
 
-    def save_conf_matrices(self, y_preds, y_test, i, j):
+    def save_conf_matrices(self, y_preds, y_test, i, j=None):
 
         y_true_classes = np.argmax(y_test, axis=1)
         classes_in_order = [i for i in range(len(self.classes))]
@@ -103,13 +106,17 @@ class DataManager:
             df.index = self.classes
             df.columns = self.classes
 
-            df.to_csv(f"{self.base_path}conf_matrices/"
-                      f"{self.models_names[m]}_{i}_{j}.csv")
+            if j is None:
+                df.to_csv(f"{self.base_path}conf_matrices/"
+                        f"{self.models_names[m]}_{i}.csv")
+            else:
+                df.to_csv(f"{self.base_path}conf_matrices/"
+                        f"{self.models_names[m]}_{i}_{j}.csv")
         return
 
 
     def _setup_results_csv(self):
-        first_csv_row = ["loss", "acc", "auc_roc", "auc_pr"]
+        first_csv_row = ["loss", "acc", "auc_roc", "auc_pr", "precision", "recall"]
         for model_name in self.models_names:
             self.write_to_results_csv(model_name, first_csv_row)
         return

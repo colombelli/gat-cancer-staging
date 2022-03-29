@@ -51,27 +51,19 @@ mlp_batch_size=8
 base_paths = [
         #"C:/Users/colombelli/Desktop/TCC/data/PMLB/waveform_40/r08/"
         #"C:/Users/colombelli/Desktop/TCC/data/TCGA/BRCA/06_005_100feat_stage23_gat_one_layer/"
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/0_005_100feat/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/01_005_100feat/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/02_005_100feat/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/03_005_100feat/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/04_005_100feat/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/05_005_100feat/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/06_005_100feat/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/07_005_100feat/",
 
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/0_005_100/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/01_005_100/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/02_005_100/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/03_005_100/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/04_005_100/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/05_005_100/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/06_005_100/",
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/07_005_100/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/0_005/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/01_005/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/02_005/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/03_005/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/04_005/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/05_005/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/06_005/",
+        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/07_005/",
         ]
 
 
-training_epochs = 500
+training_epochs = 300
 k = 10
 cross_validation_repetitions = 1
 experiments_seed = 42
