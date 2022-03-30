@@ -23,36 +23,40 @@ from losses import categorical_focal_loss
 
 models_names = ["gat", "mlp"]  # In the order they are trained/evaluated
 
-neurons_each_layer = [300, 64]
+neurons_each_layer = [128, 64]
 activations = ['elu', 'elu']
 output_activation='softmax'
 dropout=0.15
-learning_rate=0.0001
+learning_rate=0.0005
 
 #loss_function = 'categorical_crossentropy'
-loss_function = categorical_focal_loss(alpha=[0.5148, 2.5242, 1.0868, 1.34914], gamma=0)
+loss_functions = {
+  "COAD": categorical_focal_loss(alpha=[1.6023, 0.6295, 0.8294, 1.7195], gamma=0),
+  "KIRC": categorical_focal_loss(alpha=[0.5148, 2.5242, 1.0868, 1.3491], gamma=0),
+  "LUAD": categorical_focal_loss(alpha=[0.4559, 1.0206, 1.5239, 5.8552], gamma=0)
+}
 classes = ["stage1", "stage2", "stage3", "stage4"]
 
 attention_heads=8
-attention_dropout=0.15
+attention_dropout=0
 
 mlp_batch_size=8
 
-base_paths = [
-        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/test/",
-        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/01_005/",
-        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/02_005/",
-        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/03_005/",
-        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/04_005/",
-        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/05_005/",
-        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/06_005/",
-        #"C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/07_005/",
-        ]
+#base_paths = [
+#        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/test/",
+#        ]
+
+# Build base paths
+base_paths = []
+b = "C:/Users/colombelli/Desktop/TCC/experiments/"
+for cancer_type in ["COAD", "KIRC", "LUAD"]:
+  for r_th in ["0", "01", "02", "03", "04", "05", "06", "07", "08"]:
+    base_paths.append((cancer_type, f"{b}{cancer_type}/thresholds/{r_th}_005/"))
 
 
 early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
 training_epochs = 300
-repetitions = 3
+repetitions = 10
 experiments_seed = 42
 
 ##################################################
@@ -72,7 +76,7 @@ random.set_seed(experiments_seed)
 if __name__ =="__main__":
     
 
-  for base_path in base_paths:
+  for cancer_type, base_path in base_paths:
       
     print("\n\n##############################################################")
     print("Starting experiments for path:\n", base_path)
@@ -108,11 +112,11 @@ if __name__ =="__main__":
 
       gat_model = get_gat_model(generator, y_train.shape[1], neurons_each_layer,
         activations, output_activation, attention_heads, dropout, 
-        attention_dropout, learning_rate, loss_function)
+        attention_dropout, learning_rate, loss_functions[cancer_type])
 
       mlp_model = get_mlp_model(y_train.shape[1], X_train.values.shape[1], 
         neurons_each_layer, dropout, activations, output_activation,
-        learning_rate, loss_function)
+        learning_rate, loss_functions[cancer_type])
       
       print("\nTraining GAT model... ")
       gat_history = gat_model.fit(train_gen, epochs=training_epochs, 
