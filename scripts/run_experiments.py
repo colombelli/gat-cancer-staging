@@ -49,9 +49,9 @@ mlp_batch_size=8
 # Build base paths
 base_paths = []
 b = "C:/Users/colombelli/Desktop/TCC/experiments/"
-for cancer_type in ["COAD", "KIRC", "LUAD"]:
+for cancer_type in ["KIRC", "COAD", "LUAD"]:
   for r_th in ["0", "01", "02", "03", "04", "05", "06", "07", "08"]:
-    base_paths.append((cancer_type, f"{b}{cancer_type}/thresholds/{r_th}_005/"))
+    base_paths.append((cancer_type, f"{b}{cancer_type}/thresholds_2/{r_th}_005/"))
 
 
 early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
