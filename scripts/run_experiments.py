@@ -42,16 +42,19 @@ attention_dropout=0
 
 mlp_batch_size=8
 
-#base_paths = [
-#        "C:/Users/colombelli/Desktop/TCC/data/TCGA/KIRC/stage_1_2_3_4/test/",
-#        ]
 
 # Build base paths
 base_paths = []
 b = "C:/Users/colombelli/Desktop/TCC/experiments/"
+thresholds = {
+  "COAD": [0.0025, 0.0030, 0.0035, 0.0040, 0.0045],
+  "KIRC": [0.0025, 0.0030, 0.0035, 0.0040, 0.0045],
+  "LUAD": [0.0015, 0.0020, 0.0025, 0.0030, 0.0035]
+}
 for cancer_type in ["KIRC", "COAD", "LUAD"]:
-  for r_th in ["0", "01", "02", "03", "04", "05", "06", "07", "08"]:
-    base_paths.append((cancer_type, f"{b}{cancer_type}/thresholds_2/{r_th}_005/"))
+  ths = thresholds[cancer_type]
+  for th in [str(t).replace('.', '') for t in ths]:
+    base_paths.append((cancer_type, f"{b}{cancer_type}/snf/{th}/"))
 
 
 early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
@@ -77,7 +80,9 @@ if __name__ =="__main__":
     
 
   for cancer_type, base_path in base_paths:
-      
+    seed(experiments_seed)
+    random.set_seed(experiments_seed)
+
     print("\n\n##############################################################")
     print("Starting experiments for path:\n", base_path)
     print("##############################################################\n")
