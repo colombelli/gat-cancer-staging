@@ -48,7 +48,7 @@ mlp_batch_size=8
 # Build base paths
 base_paths = []
 b = "C:/Users/colombelli/Desktop/TCC/experiments/"
-percentiles = ["001", "01", "025", "05", "075", "09", "099"]
+percentiles = ["001", "005", "01", "025", "05", "075", "09", "095", "099"]
 for cancer_type in ["KIRC", "COAD", "LUAD"]:
   for net_type in ["snf", "correlation", "correlation_multi_omics"]:
     for p in percentiles:
