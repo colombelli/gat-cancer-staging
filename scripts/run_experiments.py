@@ -1,6 +1,8 @@
 from cProfile import label
 from pickle import FALSE
 import os
+
+from numpy import percentile
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import logging
@@ -46,21 +48,18 @@ mlp_batch_size=8
 # Build base paths
 base_paths = []
 b = "C:/Users/colombelli/Desktop/TCC/experiments/"
-thresholds = {
-  "COAD": [0.0025, 0.0030, 0.0035, 0.0040, 0.0045],
-  "KIRC": [0.0025, 0.0030, 0.0035, 0.0040, 0.0045],
-  "LUAD": [0.0015, 0.0020, 0.0025, 0.0030, 0.0035]
-}
+percentiles = ["001", "01", "025", "05", "075", "09", "099"]
 for cancer_type in ["KIRC", "COAD", "LUAD"]:
-  ths = thresholds[cancer_type]
-  for th in [str(t).replace('.', '') for t in ths]:
-    base_paths.append((cancer_type, f"{b}{cancer_type}/snf/{th}/"))
+  for net_type in ["snf", "correlation", "correlation_multi_omics"]:
+    for p in percentiles:
+      base_paths.append((cancer_type, f"{b}{cancer_type}/{net_type}/{p}/"))
 
 
 early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
 training_epochs = 300
 repetitions = 10
 experiments_seed = 42
+mlp_only_once = True
 
 ##################################################
 ##################################################
@@ -90,7 +89,7 @@ if __name__ =="__main__":
     dm = DataManager(base_path, models_names, classes)
     df_patients, df_features, df_classes, G = dm.load_all_data(only_cancer=True)
 
-
+    train_mlp = True
     for i in range(repetitions):
 
       X_train, X_test, y_train, y_test = train_test_split(df_features, 
@@ -104,6 +103,8 @@ if __name__ =="__main__":
 
 
       print(f"\nIteration: {i+1}")
+      histories = []
+      preds = []
 
       y_train = dm.binarize_data(y_train)
       y_validation = dm.binarize_data(y_validation)
@@ -119,9 +120,6 @@ if __name__ =="__main__":
         activations, output_activation, attention_heads, dropout, 
         attention_dropout, learning_rate, loss_functions[cancer_type])
 
-      mlp_model = get_mlp_model(y_train.shape[1], X_train.values.shape[1], 
-        neurons_each_layer, dropout, activations, output_activation,
-        learning_rate, loss_functions[cancer_type])
       
       print("\nTraining GAT model... ")
       gat_history = gat_model.fit(train_gen, epochs=training_epochs, 
@@ -130,22 +128,36 @@ if __name__ =="__main__":
           shuffle=False,  # This should be False, since shuffling 
                           # data means shuffling the whole graph
       )
+      histories.append(gat_history)
 
       gat_performance = gat_model.evaluate(test_gen)
       dm.write_to_results_csv(models_names[0], gat_performance)
       gat_pred = gat_model.predict(test_gen)[0]
+      preds.append(gat_pred)
       
-      print("\nTraining MLP model...")
-      mlp_history = mlp_model.fit(X_train, y_train, epochs=training_epochs, 
-              validation_data=(X_validation, y_validation), 
-              callbacks=[early_stop], batch_size=mlp_batch_size, verbose=0)
-      mlp_performance = mlp_model.evaluate(X_test, y_test)
-      dm.write_to_results_csv(models_names[1], mlp_performance)
-      mlp_pred = mlp_model.predict(X_test)
+      if train_mlp:
+        mlp_model = get_mlp_model(y_train.shape[1], X_train.values.shape[1], 
+          neurons_each_layer, dropout, activations, output_activation,
+          learning_rate, loss_functions[cancer_type])
+
+        print("\nTraining MLP model...")
+        mlp_history = mlp_model.fit(X_train, y_train, epochs=training_epochs, 
+                validation_data=(X_validation, y_validation), 
+                callbacks=[early_stop], batch_size=mlp_batch_size, verbose=0)
+        histories.append(mlp_history)
+
+        mlp_performance = mlp_model.evaluate(X_test, y_test)
+        dm.write_to_results_csv(models_names[1], mlp_performance)
+        mlp_pred = mlp_model.predict(X_test)
+        preds.append(mlp_pred)
+
 
 
       print("\nPlotting models' history (loss, acc, auc_roc, pr_auc) ...")
-      dm.save_plots_history([gat_history, mlp_history], i)
+      dm.save_plots_history(histories, i)
       
       print("\nSaving confusion matrices...\n")
-      dm.save_conf_matrices([gat_pred, mlp_pred], y_test, i)
+      dm.save_conf_matrices(preds, y_test, i)
+
+      if mlp_only_once:
+        train_mlp = False
