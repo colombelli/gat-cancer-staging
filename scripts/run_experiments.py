@@ -1,12 +1,7 @@
-from cProfile import label
-from pickle import FALSE
 import os
 
-from numpy import percentile
-from sklearn.utils import shuffle
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-import logging
 from keras.callbacks import EarlyStopping
 import tensorflow as tf
 import keras_tuner as kt
@@ -17,15 +12,14 @@ from sklearn.model_selection import train_test_split
 from stellargraph.mapper import FullBatchNodeGenerator
 
 from data import DataManager
-from models import get_gat_model, get_mlp_model
-from losses import categorical_focal_loss
+from models import get_gat_model, get_mlp_model, get_gcn_model
 
 
 ##################################################
 ################ INPUT PARAMETERS ################
 ##################################################
 
-models_names = ["gat", "mlp"]  # In the order they are trained/evaluated
+models_names = ["gat", "gcn", "mlp"]  # In the order they are trained/evaluated
 
 possible_num_layers = [1, 2, 3]
 possible_num_neurons = [32, 64, 128]
@@ -176,6 +170,50 @@ if __name__ =="__main__":
       dm.write_to_results_csv(models_names[0], gat_performance)
       gat_pred = gat_model.predict(test_gen)[0]
       preds.append(gat_pred)
+
+
+
+      # GCN generators
+      generator = FullBatchNodeGenerator(G, method="gcn")
+      train_gen = generator.flow(X_train.index, y_train)
+      validation_gen = generator.flow(X_validation.index, y_validation)
+      test_gen = generator.flow(X_test.index, y_test)
+
+      gcn_model_builder = get_gcn_model(generator, y_train.shape[1], 
+                    possible_num_layers, possible_gammas, possible_num_neurons,
+                    possible_dropouts, activations_function, output_activation,
+                    possible_lrs, loss_function_weights[cancer_type])
+
+      gcn_tuner = kt.Hyperband(gcn_model_builder,
+                     objective=kt.Objective('auc_pr', direction='max'),
+                     max_epochs=hp_epochs,
+                     directory=dm.base_path,
+                     project_name='hp_tuner_gcn')
+
+      print("\nTuning GCN model...")
+      with suppress_stdout():
+        gcn_tuner.search(train_gen, epochs=hp_epochs, shuffle=False,
+          validation_data=(validation_gen), callbacks=[hp_early_stop])
+        
+        best_hps = gcn_tuner.get_best_hyperparameters(5)
+        # Build the model with the best hp.
+        gcn_model = gcn_model_builder(best_hps[0])
+
+      print("\nTraining GAT model... ")
+      gcn_history = gcn_model.fit(train_gen, epochs=training_epochs, 
+          validation_data=(validation_gen), 
+          callbacks=[early_stop], verbose=0, 
+          shuffle=False,  # This should be False, since shuffling 
+                          # data means shuffling the whole graph
+      )
+      histories.append(gcn_history)
+
+      gcn_performance = gcn_model.evaluate(test_gen)
+      dm.write_to_results_csv(models_names[1], gcn_performance)
+      gcn_pred = gcn_model.predict(test_gen)[0]
+      preds.append(gcn_pred)
+
+
       
       if train_mlp:
         mlp_model_builder = get_mlp_model(y_train.shape[1], 
@@ -208,7 +246,7 @@ if __name__ =="__main__":
         histories.append(mlp_history)
 
         mlp_performance = mlp_model.evaluate(X_test, y_test)
-        dm.write_to_results_csv(models_names[1], mlp_performance)
+        dm.write_to_results_csv(models_names[2], mlp_performance)
         mlp_pred = mlp_model.predict(X_test)
         preds.append(mlp_pred)
 
