@@ -94,8 +94,7 @@ def get_gcn_model(generator, output_dimention,
             layer_sizes=num_neurons_per_layer+[output_dimention],
             activations=activations,
             generator=generator,
-            dropout=dropout,
-            normalize=None
+            dropout=dropout
         )
 
         x_inp, predictions = gcn.in_out_tensors()
