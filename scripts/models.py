@@ -14,7 +14,7 @@ def get_gat_model(generator, output_dimention,
                   possible_in_dropouts=[0.0, 0.1, 0.2, 0.3],
                   activations_function='elu',  output_activation='softmax',
                   possible_attention_heads=[2,4,8], 
-                  attention_dropout=0, 
+                  attention_dropout=0,
                   possible_lrs=[0.0001, 0.0005, 0.001, 0.005],
                   loss_function_weights = None):
 

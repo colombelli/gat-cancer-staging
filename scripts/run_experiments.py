@@ -9,6 +9,7 @@ import keras_tuner as kt
 tf.compat.v1.logging.set_verbosity(40)
 
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from stellargraph.mapper import FullBatchNodeGenerator
 
 from data import DataManager
@@ -113,6 +114,8 @@ if __name__ =="__main__":
 
     for i in range(repetitions):
 
+      print(f"\nIteration: {i+1}")
+
       X_train, X_test, y_train, y_test = train_test_split(df_features, 
                                           df_classes, stratify=df_classes, 
                                           test_size=0.2)
@@ -122,8 +125,13 @@ if __name__ =="__main__":
                                                     stratify=y_test, 
                                                     test_size=0.5)
 
+      
+      scaler = StandardScaler()
+      X_train = scaler.fit_transform(X_train)
+      X_validation = scaler.transform(X_validation)
+      X_test = scaler.transform(X_test)
 
-      print(f"\nIteration: {i+1}")
+      
       histories = []
       preds = []
 
