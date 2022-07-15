@@ -10,6 +10,7 @@ tf.compat.v1.logging.set_verbosity(40)
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 from stellargraph.mapper import FullBatchNodeGenerator
 
 from data import DataManager
@@ -45,10 +46,10 @@ mlp_batch_size=8
 
 # Build base paths
 base_paths = []
-b = "C:/Users/colombelli/Desktop/TCC/experiments/"
-percentiles = ["001", "005", "01", "025", "05", "075", "09", "095", "099"]
+b = "C:/Users/colombelli/Desktop/TCC/experiments_fs_after/"
+percentiles = ["099"]#["001", "005", "01", "025", "05", "075", "09", "095", "099"]
 for cancer_type in ["KIRC", "COAD", "LUAD"]:
-  for net_type in ["snf", "correlation", "correlation_multi_omics"]:
+  for net_type in ["correlation"]: #["snf", "correlation", "correlation_multi_omics"]:
     for p in list(reversed(percentiles)):
       base_paths.append((cancer_type, f"{b}{cancer_type}/{net_type}/{p}/"))
 
@@ -61,6 +62,9 @@ repetitions = 10
 experiments_seed = 42
 mlp_only_once = True
 train_mlp = True
+
+perform_feature_selection = True
+num_features = 50
 
 ##################################################
 ##################################################
@@ -124,13 +128,27 @@ if __name__ =="__main__":
                                                     y_test,
                                                     stratify=y_test, 
                                                     test_size=0.5)
+      if perform_feature_selection:
+        print("\nPerforming feature selection...")
+        forest = RandomForestClassifier()
+        forest.fit(X_train, y_train['class'])
+        importances = forest.feature_importances_
+        f_sorted = [f[0] for f in sorted(enumerate(importances),key=lambda i:i[1])]
 
+        best_features = f_sorted[-num_features:]
+        X_train = X_train.iloc[:, best_features]
+        X_validation = X_validation.iloc[:, best_features]
+        X_test = X_test.iloc[:, best_features]
+
+
+      X_train_index = X_train.index
+      X_validation_index = X_validation.index
+      X_test_index = X_test.index
       
       scaler = StandardScaler()
       X_train = scaler.fit_transform(X_train)
       X_validation = scaler.transform(X_validation)
       X_test = scaler.transform(X_test)
-
       
       histories = []
       preds = []
@@ -141,9 +159,9 @@ if __name__ =="__main__":
 
       # GAT generators
       generator = FullBatchNodeGenerator(G, method="gat")
-      train_gen = generator.flow(X_train.index, y_train)
-      validation_gen = generator.flow(X_validation.index, y_validation)
-      test_gen = generator.flow(X_test.index, y_test)
+      train_gen = generator.flow(X_train_index, y_train)
+      validation_gen = generator.flow(X_validation_index, y_validation)
+      test_gen = generator.flow(X_test_index, y_test)
 
       gat_model_builder = get_gat_model(generator, y_train.shape[1], 
                     possible_num_layers, possible_gammas, possible_num_neurons,
@@ -188,9 +206,9 @@ if __name__ =="__main__":
 
       # GCN generators
       generator = FullBatchNodeGenerator(G, method="gcn")
-      train_gen = generator.flow(X_train.index, y_train)
-      validation_gen = generator.flow(X_validation.index, y_validation)
-      test_gen = generator.flow(X_test.index, y_test)
+      train_gen = generator.flow(X_train_index, y_train)
+      validation_gen = generator.flow(X_validation_index, y_validation)
+      test_gen = generator.flow(X_test_index, y_test)
 
       gcn_model_builder = get_gcn_model(generator, y_train.shape[1], 
                     possible_num_layers, possible_gammas, possible_num_neurons,
@@ -216,7 +234,7 @@ if __name__ =="__main__":
         with redirect_stdout(f):
           gcn_tuner.results_summary()
 
-      print("\nTraining GAT model... ")
+      print("\nTraining GCN model... ")
       gcn_history = gcn_model.fit(train_gen, epochs=training_epochs, 
           validation_data=(validation_gen), 
           callbacks=[early_stop], verbose=0, 
@@ -234,7 +252,7 @@ if __name__ =="__main__":
       
       if train_mlp:
         mlp_model_builder = get_mlp_model(y_train.shape[1], 
-                              X_train.values.shape[1], possible_num_layers,
+                              X_train.shape[1], possible_num_layers,
                               possible_gammas, possible_num_neurons, 
                               possible_dropouts, activations_function,
                               output_activation, possible_lrs, 
