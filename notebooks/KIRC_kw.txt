@@ -1,0 +1,39 @@
+Kruskal Wallis test for Accuracy
+It rejects the Null Hypothesis that data belongs the same distribution.
+The Kruskal-Wallis H statistic: nan
+p-value: nan
+Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
+                MLP  SNF-Best  CGEN-Best  CMON-Best
+MLP        1.000000  0.809614        1.0        1.0
+SNF-Best   0.809614  1.000000        1.0        1.0
+CGEN-Best  1.000000  1.000000        1.0        1.0
+CMON-Best  1.000000  1.000000        1.0        1.0
+Pairs with p < 0.05:
+
+
+Kruskal Wallis test for AUC-ROC
+It rejects the Null Hypothesis that data belongs the same distribution.
+The Kruskal-Wallis H statistic: nan
+p-value: nan
+Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
+           MLP  SNF-Best  CGEN-Best  CMON-Best
+MLP        1.0       1.0        1.0        1.0
+SNF-Best   1.0       1.0        1.0        1.0
+CGEN-Best  1.0       1.0        1.0        1.0
+CMON-Best  1.0       1.0        1.0        1.0
+Pairs with p < 0.05:
+
+
+Kruskal Wallis test for AUC-PR
+It rejects the Null Hypothesis that data belongs the same distribution.
+The Kruskal-Wallis H statistic: nan
+p-value: nan
+Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
+                MLP  SNF-Best  CGEN-Best  CMON-Best
+MLP        1.000000  0.814468   0.493792        1.0
+SNF-Best   0.814468  1.000000   1.000000        1.0
+CGEN-Best  0.493792  1.000000   1.000000        1.0
+CMON-Best  1.000000  1.000000   1.000000        1.0
+Pairs with p < 0.05:
+
+
