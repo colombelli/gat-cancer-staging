@@ -12,12 +12,14 @@ target_encoding = preprocessing.LabelBinarizer()
 
 class DataManager:
 
-    def __init__(self, base_path, models_names, classes) -> None:
+    def __init__(self, base_path, models_names, classes, skip_csvs_setup=False) -> None:
         self.base_path = base_path
         self.models_names = models_names
         self.classes = classes
         self._create_results_directories()
-        self._setup_results_csv()
+
+        if not skip_csvs_setup:
+            self._setup_results_csv()
 
 
     def save_graph_info(self, G):
@@ -69,8 +71,25 @@ class DataManager:
         return df_features, df_classes
 
 
+    def load_graph(self, df_features):
+        edges_file = self.base_path+"edges.csv"
+        df_patients = pd.read_csv(edges_file)
+
+        G = StellarGraph(edges=df_patients, nodes=df_features)
+        self.save_graph_info(G)
+        return G
+
+
     def binarize_data(self, data):
         return target_encoding.transform(data)
+
+
+    def first_write_to_csv(self, model_name, row):
+        file_name = f"{self.base_path}{model_name}_results.csv"
+        with open(file_name, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
+        return
 
 
     def write_to_results_csv(self, model_name, row):
@@ -137,7 +156,7 @@ class DataManager:
     def _setup_results_csv(self):
         first_csv_row = ["loss", "acc", "auc_roc", "auc_pr", "precision", "recall"]
         for model_name in self.models_names:
-            self.write_to_results_csv(model_name, first_csv_row)
+            self.first_write_to_csv(model_name, first_csv_row)
         return
 
 

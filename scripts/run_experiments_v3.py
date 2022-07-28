@@ -49,18 +49,19 @@ mlp_batch_size=8
 
 # Build base paths
 base_paths = []
-b = "C:/Users/colombelli/Desktop/TCC/experiments_knn/"
-for cancer_type in ["COAD", "LUAD"]: #["KIRC", "COAD", "LUAD"]:
-    for n_neighbors in range(2,11):
-      base_paths.append((cancer_type, f"{b}{cancer_type}/{n_neighbors}/"))
+b = "C:/Users/colombelli/Desktop/TCC/experiments_extra_40/"
+for cancer_type in ["KIRC", "COAD", "LUAD"]:
+  for strategy in ["correlation", "correlation_multi_omics", "snf"]:
+    for th in ["099", "095", "09"]:
+      base_paths.append((cancer_type, f"{b}{cancer_type}/{strategy}/{th}/"))
 
 
 early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
 training_epochs = 300
 hp_epochs = 10
 hp_early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=0, patience=5)
-repetitions = 10
-experiments_seed = 42
+repetitions = 40
+experiments_seed = 13
 mlp_only_once = False
 train_mlp = False
 
@@ -107,18 +108,12 @@ if __name__ =="__main__":
     print("Starting experiments for path:\n", base_path)
     print("##############################################################\n")
 
-    dm = DataManager(base_path, models_names, classes)
-    root_cancer_path = base_path + "../"
+    dm = DataManager(base_path, models_names, classes, skip_csvs_setup=True)
+    root_cancer_path = base_path + "../../"
     df_features, df_classes = dm.load_classes_and_features(root_cancer_path,
                                                           only_cancer=True)
-
-    n_neighbors = int(base_path.split("/")[-2])
-    nnn = NearestNeighborsNet(df_features, df_classes, n_neighbors)
-    edges = nnn.all_data_net()
-    edges.to_csv(base_path+"edges.csv", index=False)
-    G = StellarGraph(edges=edges, nodes=df_features)
+    G = dm.load_graph(df_features)
     dm.save_graph_info(G)
-
 
     if mlp_only_once:
       if prev_cancer_type != cancer_type:
@@ -218,7 +213,6 @@ if __name__ =="__main__":
       dm.write_to_results_csv(models_names[0], gat_performance)
       gat_pred = gat_model.predict(test_gen)[0]
       preds.append(gat_pred)
-
 
 
       # GCN generators
