@@ -1,5 +1,7 @@
 import os
 
+from stellargraph import StellarGraph
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from keras.callbacks import EarlyStopping
@@ -15,6 +17,7 @@ from stellargraph.mapper import FullBatchNodeGenerator
 
 from data import DataManager
 from models import get_gat_model, get_mlp_model, get_gcn_model
+from build_network import NearestNeighborsNet
 from contextlib import redirect_stdout
 
 
@@ -46,12 +49,10 @@ mlp_batch_size=8
 
 # Build base paths
 base_paths = []
-b = "C:/Users/colombelli/Desktop/TCC/experiments_fs_after/"
-percentiles = ["099"]#["001", "005", "01", "025", "05", "075", "09", "095", "099"]
+b = "C:/Users/colombelli/Desktop/TCC/experiments_knn/"
 for cancer_type in ["KIRC", "COAD", "LUAD"]:
-  for net_type in ["correlation"]: #["snf", "correlation", "correlation_multi_omics"]:
-    for p in list(reversed(percentiles)):
-      base_paths.append((cancer_type, f"{b}{cancer_type}/{net_type}/{p}/"))
+    for n_neighbors in range(2,11):
+      base_paths.append((cancer_type, f"{b}{cancer_type}/{n_neighbors}/"))
 
 
 early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
@@ -60,8 +61,8 @@ hp_epochs = 10
 hp_early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=0, patience=5)
 repetitions = 10
 experiments_seed = 42
-mlp_only_once = True
-train_mlp = True
+mlp_only_once = False
+train_mlp = False
 
 z_normalize_features = False
 perform_feature_selection = False
@@ -107,7 +108,17 @@ if __name__ =="__main__":
     print("##############################################################\n")
 
     dm = DataManager(base_path, models_names, classes)
-    df_patients, df_features, df_classes, G = dm.load_all_data(only_cancer=True)
+    root_cancer_path = base_path + "../"
+    df_features, df_classes = dm.load_classes_and_features(root_cancer_path,
+                                                          only_cancer=True)
+
+    n_neighbors = int(base_path.split("/")[-2])
+    nnn = NearestNeighborsNet(df_features, df_classes, n_neighbors)
+    edges = nnn.all_data_net()
+    edges.to_csv(base_path+"edges.csv", index=False)
+    G = StellarGraph(edges=edges, nodes=df_features)
+    dm.save_graph_info(G)
+
 
     if mlp_only_once:
       if prev_cancer_type != cancer_type:

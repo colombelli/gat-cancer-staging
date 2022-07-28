@@ -20,7 +20,7 @@ class DataManager:
         self._setup_results_csv()
 
 
-    def _save_graph_info(self, G):
+    def save_graph_info(self, G):
         with open(self.base_path+"graph_info.txt", "w") as f:
             print(G.info(), file=f)
         return
@@ -46,8 +46,27 @@ class DataManager:
         target_encoding.fit_transform(df_classes['class'])
 
         G = StellarGraph(edges=df_patients, nodes=df_features)
-        self._save_graph_info(G)
+        self.save_graph_info(G)
         return df_patients, df_features, df_classes, G
+
+
+    def load_classes_and_features(self, root_cancer_path, only_cancer=False):
+
+        features_file = root_cancer_path+"features.csv"
+        classes_file = root_cancer_path+"classes.csv"
+
+        df_features = pd.read_csv(features_file, index_col=0)
+        df_classes = pd.read_csv(classes_file, index_col=0).sample(frac=1)
+
+        if only_cancer:
+            cancer_samples = df_classes.loc[df_classes["class"] != "normal"].index
+            df_classes = df_classes.loc[cancer_samples, :]
+            df_features = df_features.loc[cancer_samples, :]
+
+        global target_encoding
+        target_encoding.fit_transform(df_classes['class'])
+
+        return df_features, df_classes
 
 
     def binarize_data(self, data):
