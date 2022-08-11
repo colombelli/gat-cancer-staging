@@ -4,11 +4,13 @@ The Kruskal-Wallis H statistic: nan
 p-value: nan
 Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
                 MLP  SNF-Best  CGEN-Best  CMON-Best
-MLP        1.000000  0.809614        1.0        1.0
-SNF-Best   0.809614  1.000000        1.0        1.0
-CGEN-Best  1.000000  1.000000        1.0        1.0
-CMON-Best  1.000000  1.000000        1.0        1.0
+MLP        1.000000  0.000209   0.159293   1.000000
+SNF-Best   0.000209  1.000000   0.186961   0.005328
+CGEN-Best  0.159293  0.186961   1.000000   0.680642
+CMON-Best  1.000000  0.005328   0.680642   1.000000
 Pairs with p < 0.05:
+MLP , SNF-Best : 0.00020911244109626283
+SNF-Best , CMON-Best : 0.005327713449709533
 
 
 Kruskal Wallis test for AUC-ROC
@@ -16,12 +18,14 @@ It rejects the Null Hypothesis that data belongs the same distribution.
 The Kruskal-Wallis H statistic: nan
 p-value: nan
 Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
-           MLP  SNF-Best  CGEN-Best  CMON-Best
-MLP        1.0       1.0        1.0        1.0
-SNF-Best   1.0       1.0        1.0        1.0
-CGEN-Best  1.0       1.0        1.0        1.0
-CMON-Best  1.0       1.0        1.0        1.0
+                MLP  SNF-Best  CGEN-Best  CMON-Best
+MLP        1.000000  0.017460   0.034501   1.000000
+SNF-Best   0.017460  1.000000   1.000000   0.205105
+CGEN-Best  0.034501  1.000000   1.000000   0.400329
+CMON-Best  1.000000  0.205105   0.400329   1.000000
 Pairs with p < 0.05:
+MLP , SNF-Best : 0.017460222419618008
+MLP , CGEN-Best : 0.03450099613529896
 
 
 Kruskal Wallis test for AUC-PR
@@ -30,10 +34,12 @@ The Kruskal-Wallis H statistic: nan
 p-value: nan
 Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
                 MLP  SNF-Best  CGEN-Best  CMON-Best
-MLP        1.000000  0.814468   0.493792        1.0
-SNF-Best   0.814468  1.000000   1.000000        1.0
-CGEN-Best  0.493792  1.000000   1.000000        1.0
-CMON-Best  1.000000  1.000000   1.000000        1.0
+MLP        1.000000  0.001425   0.012766   1.000000
+SNF-Best   0.001425  1.000000   1.000000   0.148111
+CGEN-Best  0.012766  1.000000   1.000000   0.568943
+CMON-Best  1.000000  0.148111   0.568943   1.000000
 Pairs with p < 0.05:
+MLP , SNF-Best : 0.0014253769842667101
+MLP , CGEN-Best : 0.012765662586488199
 
 

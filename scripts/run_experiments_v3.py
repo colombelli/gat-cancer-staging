@@ -51,9 +51,10 @@ mlp_batch_size=8
 base_paths = []
 b = "C:/Users/colombelli/Desktop/TCC/experiments_extra_40/"
 for cancer_type in ["KIRC", "COAD", "LUAD"]:
+  #base_paths.append((cancer_type, f"{b}{cancer_type}/mlp/"))
   for strategy in ["correlation", "correlation_multi_omics", "snf"]:
-    for th in ["099", "095", "09"]:
-      base_paths.append((cancer_type, f"{b}{cancer_type}/{strategy}/{th}/"))
+    for th in ['001', '005', '01', '025', '05', '075']:
+     base_paths.append((cancer_type, f"{b}{cancer_type}/{strategy}/{th}/"))
 
 
 early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
@@ -62,8 +63,9 @@ hp_epochs = 10
 hp_early_stop = EarlyStopping(monitor='val_loss', mode='min', verbose=0, patience=5)
 repetitions = 40
 experiments_seed = 13
-mlp_only_once = False
+mlp_only_once = False  # Once means "not for all thresholds", but it does train x repetitions
 train_mlp = False
+train_gnns = True
 
 z_normalize_features = False
 perform_feature_selection = False
@@ -112,8 +114,10 @@ if __name__ =="__main__":
     root_cancer_path = base_path + "../../"
     df_features, df_classes = dm.load_classes_and_features(root_cancer_path,
                                                           only_cancer=True)
-    G = dm.load_graph(df_features)
-    dm.save_graph_info(G)
+    
+    if train_gnns:
+      G = dm.load_graph(df_features)
+      dm.save_graph_info(G)
 
     if mlp_only_once:
       if prev_cancer_type != cancer_type:
@@ -169,95 +173,97 @@ if __name__ =="__main__":
       y_validation = dm.binarize_data(y_validation)
       y_test = dm.binarize_data(y_test)
 
-      # GAT generators
-      generator = FullBatchNodeGenerator(G, method="gat")
-      train_gen = generator.flow(X_train_index, y_train)
-      validation_gen = generator.flow(X_validation_index, y_validation)
-      test_gen = generator.flow(X_test_index, y_test)
 
-      gat_model_builder = get_gat_model(generator, y_train.shape[1], 
-                    possible_num_layers, possible_gammas, possible_num_neurons,
-                    possible_dropouts, activations_function, output_activation,
-                    possible_attention_heads, attention_dropout, 
-                    possible_lrs, loss_function_weights[cancer_type])
+      if train_gnns:
+        # GAT generators
+        generator = FullBatchNodeGenerator(G, method="gat")
+        train_gen = generator.flow(X_train_index, y_train)
+        validation_gen = generator.flow(X_validation_index, y_validation)
+        test_gen = generator.flow(X_test_index, y_test)
 
-      gat_tuner = kt.Hyperband(gat_model_builder,
-                     objective=kt.Objective('auc_pr', direction='max'),
-                     max_epochs=hp_epochs,
-                     directory=dm.base_path,
-                     project_name='hp_tuner_gat')
+        gat_model_builder = get_gat_model(generator, y_train.shape[1], 
+                      possible_num_layers, possible_gammas, possible_num_neurons,
+                      possible_dropouts, activations_function, output_activation,
+                      possible_attention_heads, attention_dropout, 
+                      possible_lrs, loss_function_weights[cancer_type])
 
-      print("\nTuning GAT model...")
-      with suppress_stdout():
-        gat_tuner.search(train_gen, epochs=hp_epochs, shuffle=False,
-          validation_data=(validation_gen), callbacks=[hp_early_stop])
-        
-        best_hps = gat_tuner.get_best_hyperparameters(5)
-        # Build the model with the best hp.
-        gat_model = gat_model_builder(best_hps[0])
+        gat_tuner = kt.Hyperband(gat_model_builder,
+                      objective=kt.Objective('auc_pr', direction='max'),
+                      max_epochs=hp_epochs,
+                      directory=dm.base_path,
+                      project_name='hp_tuner_gat')
 
-      with open(dm.base_path+'gat_tunner_best_results.txt', 'w') as f:
-        with redirect_stdout(f):
-          gat_tuner.results_summary()
+        print("\nTuning GAT model...")
+        with suppress_stdout():
+          gat_tuner.search(train_gen, epochs=hp_epochs, shuffle=False,
+            validation_data=(validation_gen), callbacks=[hp_early_stop])
+          
+          best_hps = gat_tuner.get_best_hyperparameters(5)
+          # Build the model with the best hp.
+          gat_model = gat_model_builder(best_hps[0])
 
-      print("\nTraining GAT model... ")
-      gat_history = gat_model.fit(train_gen, epochs=training_epochs, 
-          validation_data=(validation_gen), 
-          callbacks=[early_stop], verbose=0, 
-          shuffle=False,  # This should be False, since shuffling 
-                          # data means shuffling the whole graph
-      )
-      histories.append(gat_history)
+        with open(dm.base_path+'gat_tunner_best_results.txt', 'w') as f:
+          with redirect_stdout(f):
+            gat_tuner.results_summary()
 
-      gat_performance = gat_model.evaluate(test_gen)
-      dm.write_to_results_csv(models_names[0], gat_performance)
-      gat_pred = gat_model.predict(test_gen)[0]
-      preds.append(gat_pred)
+        print("\nTraining GAT model... ")
+        gat_history = gat_model.fit(train_gen, epochs=training_epochs, 
+            validation_data=(validation_gen), 
+            callbacks=[early_stop], verbose=0, 
+            shuffle=False,  # This should be False, since shuffling 
+                            # data means shuffling the whole graph
+        )
+        histories.append(gat_history)
+
+        gat_performance = gat_model.evaluate(test_gen)
+        dm.write_to_results_csv(models_names[0], gat_performance)
+        gat_pred = gat_model.predict(test_gen)[0]
+        preds.append(gat_pred)
 
 
-      # GCN generators
-      generator = FullBatchNodeGenerator(G, method="gcn")
-      train_gen = generator.flow(X_train_index, y_train)
-      validation_gen = generator.flow(X_validation_index, y_validation)
-      test_gen = generator.flow(X_test_index, y_test)
+        # GCN generators
+        generator = FullBatchNodeGenerator(G, method="gcn")
+        train_gen = generator.flow(X_train_index, y_train)
+        validation_gen = generator.flow(X_validation_index, y_validation)
+        test_gen = generator.flow(X_test_index, y_test)
 
-      gcn_model_builder = get_gcn_model(generator, y_train.shape[1], 
-                    possible_num_layers, possible_gammas, possible_num_neurons,
-                    possible_dropouts, activations_function, output_activation,
-                    possible_lrs, loss_function_weights[cancer_type])
+        gcn_model_builder = get_gcn_model(generator, y_train.shape[1], 
+                      possible_num_layers, possible_gammas, possible_num_neurons,
+                      possible_dropouts, activations_function, output_activation,
+                      possible_lrs, loss_function_weights[cancer_type])
 
-      gcn_tuner = kt.Hyperband(gcn_model_builder,
-                     objective=kt.Objective('auc_pr', direction='max'),
-                     max_epochs=hp_epochs,
-                     directory=dm.base_path,
-                     project_name='hp_tuner_gcn')
+        gcn_tuner = kt.Hyperband(gcn_model_builder,
+                      objective=kt.Objective('auc_pr', direction='max'),
+                      max_epochs=hp_epochs,
+                      directory=dm.base_path,
+                      project_name='hp_tuner_gcn')
 
-      print("\nTuning GCN model...")
-      with suppress_stdout():
-        gcn_tuner.search(train_gen, epochs=hp_epochs, shuffle=False,
-          validation_data=(validation_gen), callbacks=[hp_early_stop])
-        
-        best_hps = gcn_tuner.get_best_hyperparameters(5)
-        # Build the model with the best hp.
-        gcn_model = gcn_model_builder(best_hps[0])
+        print("\nTuning GCN model...")
+        with suppress_stdout():
+          gcn_tuner.search(train_gen, epochs=hp_epochs, shuffle=False,
+            validation_data=(validation_gen), callbacks=[hp_early_stop])
+          
+          best_hps = gcn_tuner.get_best_hyperparameters(5)
+          # Build the model with the best hp.
+          gcn_model = gcn_model_builder(best_hps[0])
 
-      with open(dm.base_path+'gcn_tunner_best_results.txt', 'w') as f:
-        with redirect_stdout(f):
-          gcn_tuner.results_summary()
+        with open(dm.base_path+'gcn_tunner_best_results.txt', 'w') as f:
+          with redirect_stdout(f):
+            gcn_tuner.results_summary()
 
-      print("\nTraining GCN model... ")
-      gcn_history = gcn_model.fit(train_gen, epochs=training_epochs, 
-          validation_data=(validation_gen), 
-          callbacks=[early_stop], verbose=0, 
-          shuffle=False,  # This should be False, since shuffling 
-                          # data means shuffling the whole graph
-      )
-      histories.append(gcn_history)
+        print("\nTraining GCN model... ")
+        gcn_history = gcn_model.fit(train_gen, epochs=training_epochs, 
+            validation_data=(validation_gen), 
+            callbacks=[early_stop], verbose=0, 
+            shuffle=False,  # This should be False, since shuffling 
+                            # data means shuffling the whole graph
+        )
+        histories.append(gcn_history)
 
-      gcn_performance = gcn_model.evaluate(test_gen)
-      dm.write_to_results_csv(models_names[1], gcn_performance)
-      gcn_pred = gcn_model.predict(test_gen)[0]
-      preds.append(gcn_pred)
+        gcn_performance = gcn_model.evaluate(test_gen)
+        dm.write_to_results_csv(models_names[1], gcn_performance)
+        gcn_pred = gcn_model.predict(test_gen)[0]
+        preds.append(gcn_pred)
 
 
       

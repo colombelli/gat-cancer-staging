@@ -1,13 +1,13 @@
 import shutil
 
 from_base = "C:/Users/colombelli/Desktop/TCC/experiments/"
-to_base = "C:/Users/colombelli/Desktop/TCC/experiments_extra_20/"
+to_base = "C:/Users/colombelli/Desktop/TCC/experiments_extra_40/"
 
 for cancer in ["KIRC", "COAD", "LUAD"]:
     print(cancer)
     for strategy in ['correlation', 'correlation_multi_omics', 'snf']:
         print("\t", strategy)
-        for th in ['09', '095', '099']:
+        for th in ['001', '005', '01', '025', '05', '075']:
             print("\t\t", th)
             from_path = f"{from_base}{cancer}/{strategy}/{th}/"
             to_path = f"{to_base}{cancer}/{strategy}/{th}/"
