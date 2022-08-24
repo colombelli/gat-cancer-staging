@@ -4,11 +4,12 @@ The Kruskal-Wallis H statistic: nan
 p-value: nan
 Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
            MLP  SNF-Best  CGEN-Best  CMON-Best
-MLP        1.0       1.0        1.0        1.0
-SNF-Best   1.0       1.0        1.0        1.0
-CGEN-Best  1.0       1.0        1.0        1.0
-CMON-Best  1.0       1.0        1.0        1.0
+MLP       1.00      1.00       1.00       0.22
+SNF-Best  1.00      1.00       1.00       0.41
+CGEN-Best 1.00      1.00       1.00       0.01
+CMON-Best 0.22      0.41       0.01       1.00
 Pairs with p < 0.05:
+CGEN-Best , CMON-Best : 0.010868006700536417
 
 
 Kruskal Wallis test for AUC-ROC
@@ -17,11 +18,12 @@ The Kruskal-Wallis H statistic: nan
 p-value: nan
 Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
            MLP  SNF-Best  CGEN-Best  CMON-Best
-MLP        1.0       1.0        1.0        1.0
-SNF-Best   1.0       1.0        1.0        1.0
-CGEN-Best  1.0       1.0        1.0        1.0
-CMON-Best  1.0       1.0        1.0        1.0
+MLP       1.00      0.62       0.09       0.04
+SNF-Best  0.62      1.00       1.00       1.00
+CGEN-Best 0.09      1.00       1.00       1.00
+CMON-Best 0.04      1.00       1.00       1.00
 Pairs with p < 0.05:
+MLP , CMON-Best : 0.040643339328498146
 
 
 Kruskal Wallis test for AUC-PR
@@ -30,10 +32,12 @@ The Kruskal-Wallis H statistic: nan
 p-value: nan
 Post-Hoc Wilcoxon signed-rank test with Bonferroni correction (p-values)
            MLP  SNF-Best  CGEN-Best  CMON-Best
-MLP        1.0       1.0        1.0        1.0
-SNF-Best   1.0       1.0        1.0        1.0
-CGEN-Best  1.0       1.0        1.0        1.0
-CMON-Best  1.0       1.0        1.0        1.0
+MLP       1.00      0.32       0.02       0.00
+SNF-Best  0.32      1.00       1.00       0.65
+CGEN-Best 0.02      1.00       1.00       1.00
+CMON-Best 0.00      0.65       1.00       1.00
 Pairs with p < 0.05:
+MLP , CGEN-Best : 0.01972941512659133
+MLP , CMON-Best : 0.004447955065678521
 
 
