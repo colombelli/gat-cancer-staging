@@ -1,0 +1,3 @@
+things i did differently:
+- didn't make the deg analysis -> argument about peaking and that features are already selected
+- didn't use the p value threshold (too slow to calculate)
